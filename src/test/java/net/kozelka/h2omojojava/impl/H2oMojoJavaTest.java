@@ -6,6 +6,7 @@ import hex.genmodel.algos.gbm.GbmMojoModel;
 import hex.genmodel.easy.EasyPredictModelWrapper;
 import hex.genmodel.easy.RowData;
 import hex.genmodel.easy.exception.PredictException;
+import hex.genmodel.easy.exception.PredictUnknownCategoricalLevelException;
 import hex.genmodel.easy.prediction.BinomialModelPrediction;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -39,7 +40,7 @@ public class H2oMojoJavaTest {
 
     @Test
     public void testAirlines1() throws IOException {
-        MojoModel model = MojoModel.load(new File(TESTMODELS, "airlines1/unzipped").getAbsolutePath());
+        GenModel model = GbmMojoModel.load(new File(TESTMODELS, "airlines1/unzipped").getAbsolutePath());
         double[] row = {68,2,2,0,6};
 
         double[] pred = new double[model.getPredsSize()];
@@ -58,5 +59,23 @@ public class H2oMojoJavaTest {
          * X: 0.5280514225309799
          */
 
+    }
+
+    @Test(expected = PredictUnknownCategoricalLevelException.class)
+    public void testAirlines1Easy() throws IOException, PredictException {
+        MojoModel model = MojoModel.load(new File(TESTMODELS, "airlines1/unzipped").getAbsolutePath());
+        final EasyPredictModelWrapper.Config config = new EasyPredictModelWrapper.Config();
+        config.setModel(model);
+        config.setConvertInvalidNumbersToNa(true);
+        final EasyPredictModelWrapper easyModel = new EasyPredictModelWrapper(config);
+        final RowData row = new RowData();
+        row.put("Year", "68");
+        row.put("Month", "2");
+        row.put("DayofMonth", "2");
+        row.put("DayOfWeek", "0");
+        row.put("UniqueCarrier", "6");
+        final BinomialModelPrediction pred = easyModel.predictBinomial(row);
+        System.out.printf("Prediction result: label[%d]='%s'%n", pred.labelIndex, pred.label);
+        System.out.printf("- probabilities: [0]=%f, [1]=%f%n", pred.classProbabilities[0], pred.classProbabilities[1]);
     }
 }
