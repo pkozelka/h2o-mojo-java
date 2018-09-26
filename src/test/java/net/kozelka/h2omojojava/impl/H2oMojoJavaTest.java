@@ -12,7 +12,6 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.Console;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -21,6 +20,22 @@ import java.util.Arrays;
 public class H2oMojoJavaTest {
 
     private static final File TESTMODELS = new File(System.getProperty("user.home"), "h2o/h2o-mojo/testmodels");
+
+    @Test
+    public void testNamesV100() throws IOException, PredictException {
+        final EasyPredictModelWrapper.Config config = new EasyPredictModelWrapper.Config();
+        final GenModel model = GbmMojoModel.load("src/test/resources/gbm_v1.00_names.mojo");
+        config.setModel(model);
+        config.setConvertInvalidNumbersToNa(false);
+        final EasyPredictModelWrapper easyModel = new EasyPredictModelWrapper(config);
+        final RowData row = new RowData();
+        row.put("name", "Mary");
+        row.put("year", "1880");
+        row.put("count", "7065");
+        final BinomialModelPrediction pred = easyModel.predictBinomial(row);
+        System.out.printf("Result: %s\n", pred.label);
+        System.out.printf("Class probabilities: %f %f\n", pred.classProbabilities[0], pred.classProbabilities[1]);
+    }
 
     @Test
     public void testProstate() throws IOException, PredictException {
