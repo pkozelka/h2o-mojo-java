@@ -22,6 +22,7 @@ public class MojoTreeReader {
     }
 
     private void skip(int n) {
+        System.out.printf("%5d = 0x%1$04X skip %d%n", position, n);
         position += n;
     }
     private int get1U() {
@@ -105,8 +106,13 @@ public class MojoTreeReader {
             default: throw new UnsupportedOperationException("lmask=" + lmask);
         }
         node.setRightNodeAddress(position + rno);
-        if ((lmask & 0x90) > 0) { ///// both lmask (0x30) and rmask (0xC0), lower of the 2 bits
+        if ((lmask & 0x10) > 0) { ///// both lmask (0x30) and rmask (0xC0), lower of the 2 bits
             node.setLeafValue(get4f());
+        }
+        if ((nodeType & 0x40) > 0) {
+            // this is speculative!!!
+            float wtf = get4f();
+            System.out.printf("%5d = 0x%1$04X !SPECULATIVE! %f%n", position, wtf);
         }
         node.setLeftNodeAddress(position);
 

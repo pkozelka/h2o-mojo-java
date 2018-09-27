@@ -56,13 +56,17 @@ public class MtrNode {
     public String toString() {
         final StringBuilder sb = new StringBuilder("MtrNode{");
         sb.append("address=").append(address);
-        sb.append(String.format(", u1NodeType=%02X", u1NodeType));
+        sb.append(String.format(", u1NodeType=0x%02X(R/L/E=%02X/%02X/0x%02X)",
+            u1NodeType,
+            u1NodeType & 0xC0,
+            u1NodeType & 0x30,
+            u1NodeType & 0x33
+            ));
         sb.append(", u2ColumnId=").append(u2ColumnId);
         sb.append(", f4LeafValue=").append(f4LeafValue);
         sb.append(", u1NaSplitDir=").append(u1NaSplitDir);
         sb.append(", rightNodeAddress=").append(rightNodeAddress);
         sb.append(", f4SplitValueFloat=").append(f4SplitValueFloat);
-        sb.append(", leftNodeAddress=").append(leftNodeAddress);
         sb.append('}');
         return sb.toString();
     }
