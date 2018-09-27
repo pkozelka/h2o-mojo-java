@@ -10,46 +10,40 @@ public class MojoTreeReaderTest {
 
     /*
 0000:
-  00 05 00 05 3d 22 50 41  9a 00 03 00 03 0e 08 92
+  0c 00 00 04 04 00 2b 00  5d 05 35 0e 12 5c 6c ba
 0010:
-  41 42 00 03 00 05 2f 51  28 41 10 f0 05 00 04 a8
+  c2 d7 40 22 84 d0 4b 69  35 dc 87 0e 58 1f 82 6c
 0020:
-  b6 43 41 cd cc cc bd 0a  d7 a3 bc 00 04 00 04 00
+  9f 40 10 10 80 b1 4b 20  d2 32 a7 86 62 d4 e8 a8
 0030:
-  00 00 3f 10 f0 05 00 04  30 a6 14 41 33 33 33 3f
+  64 ff 0a 53 3c 00 00 04  04 00 2b 00 5d 05 35 0e
 0040:
-  83 2d 58 3e f8 02 00 05  02 00 00 00 cd cc cc bd
+  12 5c 6c ba c2 d7 40 22  84 d0 4b 69 35 dc 87 0e
 0050:
-  f5 49 9f 3d 00 04 00 04  00 00 00 3f 29 08 02 00
+  78 1f 82 6c 9f 40 10 10  90 b1 4b 20 d2 32 a7 86
 0060:
-  05 02 00 00 00 10 f0 05  00 04 00 40 2c 41 52 b8
+  62 d4 e8 a8 64 ff 0a a7  e1 18 be 30 01 00 04 00
 0070:
-  1e 3f 66 66 66 3e f0 03  00 02 00 c8 19 42 33 33
+  50 ef 44 a7 e1 18 be f0  02 00 05 00 d8 17 45 ba
 0080:
-  33 3f b1 8f 0b 3f c8 02  00 04 02 00 00 00 10 f0
+  0e 9b 3e a7 e1 18 be cc  00 00 05 04 00 2b 00 5d
 0090:
-  05 00 04 66 f6 22 41 4b  ad 54 3e cd cc cc bd 4b
+  05 35 0e 12 5c 6c ba c2  d7 40 22 84 d0 4b 69 35
 00a0:
-  9c fa 3e cc 06 00 02 00  00 18 00 6f 2f ba 56 5a
+  dc 87 0e 58 1f 82 6c 9f  40 10 10 80 b1 4b 20 d2
 00b0:
-  17 e2 67 d3 7a 9a bb 43  7e af 3e f7 45 a7 e7 ab
+  32 a7 86 62 d4 e8 a8 64  bf 0a 28 30 01 00 05 00
 00c0:
-  23 00 02 4a 00 05 00 05  00 84 8a 41 1c 30 03 00
+  d0 ed 44 09 84 59 3e 30  02 00 05 00 80 d8 44 eb
 00d0:
-  03 c8 9a 3c 41 cd cc cc  bd f8 00 00 04 01 00 00
+  20 71 bd f0 01 00 05 00  10 ef 44 09 84 59 3e 00
 00e0:
-  00 37 87 12 3e 00 00 00  00 08 00 00 04 03 00 00
-00f0:
-  00 10 f0 05 00 05 ef 10  c9 41 d6 03 81 bd d1 e1
-0100:
-  c9 bd f0 03 00 01 be c1  64 bd 27 70 02 3f 33 33
-0110:
-  33 3f
+  bc 7c 3d ba 0e 9b 3e
     
      */
     @Test
     public void name() throws IOException {
-        final MojoTreeReader mtr = new MojoTreeReader(new File("src/test/resources/gbm_v1.00_titanic.mojo/trees/t00_000.bin"), 8);
+        final MojoTreeReader mtr = new MojoTreeReader(new File("src/test/resources/gbm_v1.00_names.mojo/trees/t00_000.bin"), 2);
         final List<MtrNode> nodes = mtr.process();
         for (MtrNode node : nodes) {
             System.out.println(node);

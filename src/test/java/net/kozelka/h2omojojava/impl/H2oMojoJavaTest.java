@@ -37,6 +37,34 @@ public class H2oMojoJavaTest {
         System.out.printf("Class probabilities: %f %f\n", pred.classProbabilities[0], pred.classProbabilities[1]);
     }
 
+    /*
+pclass
+survived
+sex
+age
+sibsp
+fare
+cabin
+embarked
+body
+parch
+     */
+    @Test
+    public void testNamesV100() throws IOException, PredictException {
+        final EasyPredictModelWrapper.Config config = new EasyPredictModelWrapper.Config();
+        final GenModel model = GbmMojoModel.load("src/test/resources/gbm_v1.00_names.mojo");
+        config.setModel(model);
+        config.setConvertInvalidNumbersToNa(false);
+        final EasyPredictModelWrapper easyModel = new EasyPredictModelWrapper(config);
+        final RowData row = new RowData();
+        row.put("age", "68");
+        row.put("sex", "M");
+        row.put("pclass", "1");
+        final BinomialModelPrediction pred = easyModel.predictBinomial(row);
+        System.out.printf("Result: %s\n", pred.label);
+        System.out.printf("Class probabilities: %f %f\n", pred.classProbabilities[0], pred.classProbabilities[1]);
+    }
+
     @Test
     public void testProstate() throws IOException, PredictException {
         final EasyPredictModelWrapper.Config config = new EasyPredictModelWrapper.Config();
