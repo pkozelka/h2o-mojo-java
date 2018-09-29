@@ -7,9 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MojoTreeReader {
-    private final byte[] bytes;
+    final byte[] bytes;
+    int position = 0;
+    private Explainer explainer = new Explainer(this);
     private final int nclasses;
-    private int position = 0;
 
     public MojoTreeReader(File treeFile, int nclasses) throws IOException {
         this.nclasses = nclasses;
@@ -22,11 +23,9 @@ public class MojoTreeReader {
     }
 
     private void skip(int n) {
-        System.out.printf("%5d = 0x%1$04X skip %d%n", position, n);
         position += n;
     }
     private int get1U() {
-        System.out.printf("%5d = 0x%1$04X %02X%n", position, bytes[position]);
         return bytes[position++] & 0xFF;
     }
     private int get2() {
@@ -43,26 +42,45 @@ public class MojoTreeReader {
     }
 
     public List<MtrNode> process() {
-        final List<MtrNode> result = new ArrayList<>();
-        while (position < bytes.length) {
-            final MtrNode node = readNode();
-            result.add(node);
-            System.out.println("node = " + node);
+        try {
+            final List<MtrNode> result = new ArrayList<>();
+            while (position < bytes.length) {
+                final MtrNode node = readNode();
+                result.add(node);
+            }
+            return result;
+        } catch (Exception e) {
+            explainer.flush();
+            final int cnt = bytes.length - position;
+            position += cnt;
+            explainer.explainBytes(cnt, e.getClass().getName() + ": " + e.getMessage());
+            throw e;
         }
-        return result;
     }
 
     private MtrNode readNode() {
         final int addr = position;
-        final int nodeType = get1U();
-        final int colId = get2();
+        final int nodeType = get1U();                                                                           // B
+        explainer.explainNodeType();
+
+        final int colId = get2();                                                                               // B B
+        explainer.explainInteger(2, colId, "column ID");
+        if (colId > 1000) {
+            throw new IllegalStateException("too big column ID: " + colId);
+        }
+
         final MtrNode node = new MtrNode(addr, (byte) nodeType, colId);
         if (colId == 0xFFFF) {
-            node.setLeafValue(get4f());
+            float leafValue = get4f();
+            node.setLeafValue(leafValue);                                                                         // B B B B
+            explainer.explainFloat(leafValue,"LEAF VALUE");
             return node;
         }
 
-        final NASplitDir naSplitDir = NASplitDir.valueOf(get1U());
+        int naSplitDirByte = get1U();
+        final NASplitDir naSplitDir = NASplitDir.valueOf(naSplitDirByte);                                              // B
+        explainer.explainInteger(1, naSplitDirByte, "direction = " + naSplitDir);
+
         node.setNaSplitDir(naSplitDir);
         boolean naVsRest = naSplitDir == NASplitDir.NAvsREST;
         boolean leftward = naSplitDir == NASplitDir.NALeft || naSplitDir == NASplitDir.Left;
@@ -77,16 +95,22 @@ public class MojoTreeReader {
             // "equal" determines what will be the split value
             switch (equal) {
                 case 0x00: // split by number
-                    node.setSplitValueFloat(get4f());
+                    float splitValue = get4f();
+                    node.setSplitValueFloat(splitValue);                                                           // B B B B
+                    explainer.explainFloat(splitValue, "split value");
                     break;
                 case 0x08: // read 32 bits
-                    skip(4); //TODO store them
+                    skip(4); //TODO store them                                                               // B B B B
+                    explainer.explainBytes(4, "short bitset");
                     break;
                 case 0x0C: // read bits from n bytes
                 {
-                    int bitoff = get2();
-                    int nbytes = get2();
-                    skip(nbytes); //TODO store them
+                    int bitoff = get2();                                                                        // B B
+                    explainer.explainInteger(2, bitoff, "[].bitoff");
+                    int nbytes = get2();                                                                        // B B
+                    explainer.explainInteger(2, nbytes, "[].nbytes");
+                    skip(nbytes); //TODO store them                                                             // B*
+                    explainer.explainBytes(nbytes, "long bitset");
                     break;
                 }
                 default: throw new UnsupportedOperationException("equal=" + equal);
@@ -105,14 +129,20 @@ public class MojoTreeReader {
             case 0x30: rno = 4; break;
             default: throw new UnsupportedOperationException("lmask=" + lmask);
         }
-        node.setRightNodeAddress(position + rno);
         if ((lmask & 0x10) > 0) { ///// both lmask (0x30) and rmask (0xC0), lower of the 2 bits
-            node.setLeafValue(get4f());
+            float leftLeafValue = get4f();
+            node.setLeafValue(leftLeafValue);                                                                         // B B B B
+            explainer.explainFloat(leftLeafValue, "right leaf value");
+
+        } else {
+            int rightNodeAddress = position + rno;
+            explainer.explainBytes(position - explainer.unexplainedPosition, String.format("right node address is %d = 0x%1$04X", rightNodeAddress));
+            node.setRightNodeAddress(rightNodeAddress);
         }
-        if ((nodeType & 0x40) > 0) {
+        if ((nodeType & 0xF0) == 0xF0) {
             // this is speculative!!!
-            float wtf = get4f();
-            System.out.printf("%5d = 0x%1$04X !SPECULATIVE! %f%n", position, wtf);
+            float wtf = get4f();                                                                                // B B B B
+            explainer.explainFloat(wtf, "left leaf value");
         }
         node.setLeftNodeAddress(position);
 
@@ -148,7 +178,7 @@ public class MojoTreeReader {
             for (NASplitDir c : values()) {
                 if (c.value == value) return c;
             }
-            throw new IllegalArgumentException(String.format("0x%02X = %1$d", value & 0xFF));
+            throw new IllegalArgumentException(String.format("NASplitDir from 0x%02X = %1$d", value & 0xFF));
         }
     }
 
