@@ -76,7 +76,7 @@ public class MojoTreeReader {
         final NASplitDir naSplitDir = NASplitDir.valueOf(naSplitDirByte);
         explainer.explainInteger(1, naSplitDirByte, "direction = " + naSplitDir);
 
-        node.setNaSplitDir(naSplitDir);
+        node.setSplitType(naSplitDir);
         boolean naVsRest = naSplitDir == NASplitDir.NAvsREST;
         boolean leftward = naSplitDir == NASplitDir.NALeft || naSplitDir == NASplitDir.Left;
 

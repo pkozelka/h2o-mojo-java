@@ -2,6 +2,8 @@ package net.kozelka.h2omojojava.impl;
 
 import lombok.Data;
 
+import java.util.BitSet;
+
 @Data
 public class MtrNode {
     private String level;
@@ -11,13 +13,16 @@ public class MtrNode {
     private byte u1NodeType;
 
     // condition definition
-    private int u2ColumnId;
-    private MojoTreeReader.NASplitDir naSplitDir;
+    private MojoTreeReader.NASplitDir splitType;
+    private int splitColumnId;
     private Float splitValueFloat;
+    private BitSet splitValueBitset;
 
+    // "if" part
     private MtrNode leftNode;
     private Float leftLeafValue;
 
+    // "else" part
     private int rightNodeAddress;
     private MtrNode rightNode;
     private Float rightLeafValue;
@@ -26,7 +31,7 @@ public class MtrNode {
         this.address = address;
 
         this.u1NodeType = nodeType;
-        this.u2ColumnId = colId;
+        this.splitColumnId = colId;
     }
 
 }
