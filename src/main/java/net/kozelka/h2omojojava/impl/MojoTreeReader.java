@@ -66,7 +66,7 @@ public class MojoTreeReader {
         if (colId == 0xFFFF) {
             float leafValue = get4f();
             explainer.explainFloat(leafValue,"LEAF VALUE");
-            node.setLeafValue(leafValue);
+            node.setLeftLeafValue(leafValue);
             return node;
         } else if (colId > 1000) {
             throw new IllegalStateException("too big column ID: " + colId);
@@ -132,7 +132,7 @@ public class MojoTreeReader {
 
         if ((nodeType & 0x10)>0) { ///// both lmask (0x30) and rmask (0xC0), lower of the 2 bits
             float leafValue = get4f();
-            node.setLeafValue(leafValue);
+            node.setLeftLeafValue(leafValue);
             explainer.explainFloat(leafValue, "left leaf value");
         } else {
             final MtrNode left = readSubNode(level + "L");
@@ -141,7 +141,7 @@ public class MojoTreeReader {
         //
         if ((nodeType & 0x40) == 0x40) { ///// both lmask (0x30) and rmask (0xC0), lower of the 2 bits
             float leafValue = get4f();
-            node.setLeafValue(leafValue);
+            node.setRightLeafValue(leafValue);
             explainer.explainFloat(leafValue, "right leaf value");
         } else {
             final MtrNode right = readSubNode(level + "r");

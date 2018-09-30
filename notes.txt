@@ -1,0 +1,46 @@
+
+
+u1 nodetype: 2b rmask, 2b lmask, 2b equal, 2b +lmask
+u2 colId
+ ? f4 leafValue if colId=FFFF
+u1 NA + split direction
+
+SPLIT VALUE if not NA
+a) f4 for equal==0
+b) u4 for equal==8
+c) u2,u2, n*u1 bytes with the bitset
+
+
+CONTENT
+
+? u1*(lmask+1) if lmask<=3 : offset to right
+
+- if lmask & 0x10   
+  then 4f leafValue
+  else read subnode
+
+- if rmask & 0x40   
+  then 4f leafValue
+  else read subnode
+
+
+
+
+
+
+
+
+
+RIGHT
+- skip left area if lmask <=3
+- if rmask & 0x40   
+  then 4f leafValue
+  else read subnode
+
+
+LEFT
+ ? u1*(lmask+1) if lmask<=3 ... skip the offset
+- if lmask & 0x10   
+  then 4f leafValue
+  else read subnode
+

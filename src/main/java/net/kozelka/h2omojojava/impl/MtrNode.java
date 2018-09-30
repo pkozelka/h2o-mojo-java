@@ -1,18 +1,26 @@
 package net.kozelka.h2omojojava.impl;
 
+import lombok.Data;
+
+@Data
 public class MtrNode {
     private String level;
     private int address;
-    private byte u1NodeType;
-    private int u2ColumnId;
 
-    private Float f4LeafValue = null;
-    private MojoTreeReader.NASplitDir u1NaSplitDir;
-    private Float f4SplitValueFloat;
-    private int rightNodeAddress;
+    // node flags
+    private byte u1NodeType;
+
+    // condition definition
+    private int u2ColumnId;
+    private MojoTreeReader.NASplitDir naSplitDir;
+    private Float splitValueFloat;
 
     private MtrNode leftNode;
+    private Float leftLeafValue;
+
+    private int rightNodeAddress;
     private MtrNode rightNode;
+    private Float rightLeafValue;
 
     public MtrNode(int address, byte nodeType, int colId) {
         this.address = address;
@@ -21,71 +29,4 @@ public class MtrNode {
         this.u2ColumnId = colId;
     }
 
-    public void setLeafValue(Float leafValue) {
-        this.f4LeafValue = leafValue;
-    }
-
-    public void setNaSplitDir(MojoTreeReader.NASplitDir naSplitDir) {
-
-        u1NaSplitDir = naSplitDir;
-    }
-
-    public void setSplitValueFloat(float splitValueFloat) {
-        this.f4SplitValueFloat = splitValueFloat;
-    }
-
-    public float getSplitValueFloat() {
-        return f4SplitValueFloat;
-    }
-
-    public void setRightNodeAddress(int rightNodeAddress) {
-        this.rightNodeAddress = rightNodeAddress;
-    }
-
-    public int getRightNodeAddress() {
-        return rightNodeAddress;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("MtrNode{");
-        sb.append("address=").append(address);
-        sb.append(String.format(", u1NodeType=0x%02X(R/L/E=%02X/%02X/%02X)",
-            u1NodeType,
-            u1NodeType & 0xC0,
-            u1NodeType & 0x30,
-            u1NodeType & 0x0C
-            ));
-        sb.append(", u2ColumnId=").append(u2ColumnId);
-        sb.append(", f4LeafValue=").append(f4LeafValue);
-        sb.append(", u1NaSplitDir=").append(u1NaSplitDir);
-        sb.append(", rightNodeAddress=").append(rightNodeAddress);
-        sb.append(", f4SplitValueFloat=").append(f4SplitValueFloat);
-        sb.append('}');
-        return sb.toString();
-    }
-
-    public MtrNode getLeftNode() {
-        return leftNode;
-    }
-
-    public void setLeftNode(MtrNode leftNode) {
-        this.leftNode = leftNode;
-    }
-
-    public MtrNode getRightNode() {
-        return rightNode;
-    }
-
-    public void setRightNode(MtrNode rightNode) {
-        this.rightNode = rightNode;
-    }
-
-    public void setLevel(String level) {
-        this.level = level;
-    }
-
-    public String getLevel() {
-        return level;
-    }
 }
