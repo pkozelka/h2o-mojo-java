@@ -68,7 +68,7 @@ public class MojoTreeReader {
             explainer.explainFloat(leafValue,"LEAF VALUE");
             node.setLeftLeafValue(leafValue);
             return node;
-        } else if (colId > 1000) {
+        } else if (colId > 100000) {
             throw new IllegalStateException("too big column ID: " + colId);
         }
 
