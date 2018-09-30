@@ -1,9 +1,7 @@
 package net.kozelka.h2omojojava.impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.List;
 
 public class Explainer {
     int unexplainedPosition = 0;
@@ -41,7 +39,7 @@ public class Explainer {
             }
 
             final String descPart = descriptions.isEmpty() ? "" : descriptions.removeFirst();
-            if (descPart.startsWith("===")) {
+            if (descPart.startsWith("; > ")) {
                 System.out.println();
             }
             System.out.printf("%s %s %s%n", addrPart, hexPart, descPart);

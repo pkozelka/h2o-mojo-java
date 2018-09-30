@@ -1,6 +1,7 @@
 package net.kozelka.h2omojojava.impl;
 
 public class MtrNode {
+    private String level;
     private int address;
     private byte u1NodeType;
     private int u2ColumnId;
@@ -9,11 +10,9 @@ public class MtrNode {
     private MojoTreeReader.NASplitDir u1NaSplitDir;
     private Float f4SplitValueFloat;
     private int rightNodeAddress;
-    private int leftNodeAddress;
 
     private MtrNode leftNode;
     private MtrNode rightNode;
-    private String level;
 
     public MtrNode(int address, byte nodeType, int colId) {
         this.address = address;
@@ -43,18 +42,9 @@ public class MtrNode {
         this.rightNodeAddress = rightNodeAddress;
     }
 
-    public void setLeftNodeAddress(int leftNodeAddress) {
-        this.leftNodeAddress = leftNodeAddress;
-    }
-
     public int getRightNodeAddress() {
         return rightNodeAddress;
     }
-
-    public int getLeftNodeAddress() {
-        return leftNodeAddress;
-    }
-
 
     @Override
     public String toString() {
