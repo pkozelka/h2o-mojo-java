@@ -113,7 +113,7 @@ public class MojoTreeReader {
 
         }
 
-        // read RIGHT NODE OFFSET which actually is LEFT NODE CONTENT
+        // read RIGHT NODE OFFSET which actually is LEFT SIDE CONTENT size
         final int rno;
         switch (lmask) {
             case 0x00: rno = get1U(); break;
@@ -130,7 +130,7 @@ public class MojoTreeReader {
             node.setRightNodeAddress(rightNodeAddress);
         }
 
-        if ((nodeType & 0x10)>0) { ///// both lmask (0x30) and rmask (0xC0), lower of the 2 bits
+        if ((nodeType & 0x10) > 0) {
             float leafValue = get4f();
             node.setLeftLeafValue(leafValue);
             explainer.explainFloat(leafValue, "left leaf value");
@@ -139,7 +139,7 @@ public class MojoTreeReader {
             node.setLeftNode(left);
         }
         //
-        if ((nodeType & 0x40) == 0x40) { ///// both lmask (0x30) and rmask (0xC0), lower of the 2 bits
+        if ((nodeType & 0x40) > 0) {
             float leafValue = get4f();
             node.setRightLeafValue(leafValue);
             explainer.explainFloat(leafValue, "right leaf value");
