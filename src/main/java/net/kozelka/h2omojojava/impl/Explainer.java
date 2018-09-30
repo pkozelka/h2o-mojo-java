@@ -83,4 +83,9 @@ public class Explainer {
         unexplainedPosition += bytecount;
         flush();
     }
+
+    public void comment(String desc) {
+        describe("; %s", desc);
+        flush();
+    }
 }

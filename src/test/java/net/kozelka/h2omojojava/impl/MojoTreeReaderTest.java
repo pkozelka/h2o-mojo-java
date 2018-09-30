@@ -42,11 +42,18 @@ public class MojoTreeReaderTest {
     
      */
     @Test
-    public void name() throws IOException {
+    public void readSimple() throws IOException {
         final MojoTreeReader mtr = new MojoTreeReader(new File("src/test/resources/gbm_v1.00_names.mojo/trees/t00_000.bin"), 2);
         final List<MtrNode> nodes = mtr.process();
         for (MtrNode node : nodes) {
             System.out.println(node);
         }
+    }
+
+    @Test
+    public void readRecursive() throws IOException {
+        final MojoTreeReader mtr = new MojoTreeReader(new File("src/test/resources/gbm_v1.00_names.mojo/trees/t00_055.bin"), 2);
+        final MtrNode root = mtr.readRootNode();
+        System.out.println("root = " + root);
     }
 }

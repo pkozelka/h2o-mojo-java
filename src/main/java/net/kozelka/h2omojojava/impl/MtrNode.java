@@ -1,15 +1,19 @@
 package net.kozelka.h2omojojava.impl;
 
 public class MtrNode {
-    private final int address;
-    private final byte u1NodeType;
-    private final int u2ColumnId;
+    private int address;
+    private byte u1NodeType;
+    private int u2ColumnId;
 
     private Float f4LeafValue = null;
     private MojoTreeReader.NASplitDir u1NaSplitDir;
     private Float f4SplitValueFloat;
     private int rightNodeAddress;
     private int leftNodeAddress;
+
+    private MtrNode leftNode;
+    private MtrNode rightNode;
+    private String level;
 
     public MtrNode(int address, byte nodeType, int colId) {
         this.address = address;
@@ -69,5 +73,29 @@ public class MtrNode {
         sb.append(", f4SplitValueFloat=").append(f4SplitValueFloat);
         sb.append('}');
         return sb.toString();
+    }
+
+    public MtrNode getLeftNode() {
+        return leftNode;
+    }
+
+    public void setLeftNode(MtrNode leftNode) {
+        this.leftNode = leftNode;
+    }
+
+    public MtrNode getRightNode() {
+        return rightNode;
+    }
+
+    public void setRightNode(MtrNode rightNode) {
+        this.rightNode = rightNode;
+    }
+
+    public void setLevel(String level) {
+        this.level = level;
+    }
+
+    public String getLevel() {
+        return level;
     }
 }
