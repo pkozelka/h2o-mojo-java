@@ -41,7 +41,7 @@ public class MultiTreeTest {
 
     @Test
     public void test() throws IOException {
-        final MojoTreeReader mtr = new MojoTreeReader(new File(trees, filename), 2);
+        final MojoTreeReader mtr = new MojoTreeReader(new File(trees, filename), 2, 100 /*130*/);
         final MtrNode root = mtr.readRootNode();
 
     }

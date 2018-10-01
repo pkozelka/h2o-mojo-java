@@ -9,9 +9,11 @@ public class MojoTreeReader {
     int position = 0;
     private Explainer explainer = new Explainer(this);
     private final int nclasses;
+    private int mojoVersion;
 
-    public MojoTreeReader(File treeFile, int nclasses) throws IOException {
+    public MojoTreeReader(File treeFile, int nclasses, int mojoVersion) throws IOException {
         this.nclasses = nclasses;
+        this.mojoVersion = mojoVersion;
         try (final InputStream is = new FileInputStream(treeFile);
              final ByteArrayOutputStream os = new ByteArrayOutputStream()) {
 
@@ -102,10 +104,18 @@ public class MojoTreeReader {
                 {
                     int bitoff = get2();
                     explainer.explainInteger(2, bitoff, "[].bitoff");
-                    int nbytes = get2();
-                    explainer.explainInteger(2, nbytes, "[].nbytes");
-                    skip(nbytes); //TODO store them
-                    explainer.explainBytes(nbytes, "long bitset");
+                    if (mojoVersion < 130) {
+                        int nbytes = get2();
+                        explainer.explainInteger(2, nbytes, "[].nbytes");
+                        skip(nbytes); //TODO store them
+                        explainer.explainBytes(nbytes, "long bitset OLD");
+                    } else {
+                        int nbits = get4();
+                        final int nbytes = bytes(nbits);
+                        explainer.explainInteger(4, nbits, "[].nbits");
+                        skip(nbytes); //TODO store them
+                        explainer.explainBytes(nbytes, "long bitset V1.30");
+                    }
                     break;
                 }
                 default: throw new UnsupportedOperationException("equal=" + equal);
@@ -151,6 +161,10 @@ public class MojoTreeReader {
         return node;
     }
 
+    private static int bytes(int nbits) {
+        return ((nbits-1) >> 3) + 1;
+    }
+
     /**
      * Split direction for missing values.
      *
@@ -168,7 +182,8 @@ public class MojoTreeReader {
 
         // never NAs in training, but have a way to deal with them in scoring
         Left(4),     //test time NA should go left
-        Right(5);    //test time NA should go right
+        Right(5),    //test time NA should go right
+        OTHER(255);
 
         private int value;
         NASplitDir(int v) { this.value = v; }
@@ -178,7 +193,8 @@ public class MojoTreeReader {
             for (NASplitDir c : values()) {
                 if (c.value == value) return c;
             }
-            throw new IllegalArgumentException(String.format("NASplitDir from 0x%02X = %1$d", value & 0xFF));
+            return OTHER;
+//            throw new IllegalArgumentException(String.format("NASplitDir from 0x%02X = %1$d", value & 0xFF));
         }
     }
 
