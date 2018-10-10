@@ -14,7 +14,7 @@ import java.util.BitSet;
 @Data
 public class MtrNode {
     private String level;
-    private int address;
+    private final int address;
 
     /**
      * node flags
@@ -22,11 +22,11 @@ public class MtrNode {
      * mask 0x33: lmask - if < 4, the number of bytes to add to 1 for storing offset to right node content
      * mask 0x40: if set, right subnode is a leaf and its float value follows; otherwise right subnode follows
      */
-    private byte u1NodeType;
+    private final NodeFlags nodeFlags;
+    private final int splitColumnId;
 
     // condition definition
     private MojoTreeReader.NASplitDir splitType;
-    private int splitColumnId;
     private Float splitValueFloat;
     private BitSet splitValueBitset;
 
@@ -39,10 +39,10 @@ public class MtrNode {
     private MtrNode rightNode;
     private Float rightLeafValue;
 
-    public MtrNode(int address, byte nodeType, int colId) {
+    public MtrNode(int address, NodeFlags nodeFlags, int colId) {
         this.address = address;
 
-        this.u1NodeType = nodeType;
+        this.nodeFlags = nodeFlags;
         this.splitColumnId = colId;
     }
 

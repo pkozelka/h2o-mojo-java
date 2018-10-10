@@ -2,7 +2,11 @@ package net.kozelka.h2omojojava.impl;
 
 import org.codehaus.plexus.util.IOUtil;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class MojoTreeReader {
     final byte[] bytes;
@@ -54,53 +58,56 @@ public class MojoTreeReader {
 
     }
 
+    private NASplitDir parseSplitDirection() {
+        int naSplitDirByte = get1U();
+        final NASplitDir naSplitDir = NASplitDir.valueOf(naSplitDirByte);
+        explainer.explainInteger(1, naSplitDirByte, "direction = " + naSplitDir);
+        return naSplitDir;
+    }
+
     private MtrNode readSubNode(String level) {
         explainer.comment("> " + level);
         final int addr = position;
         final int nodeType = get1U();
+        final NodeFlags nodeFlags = new NodeFlags((byte) nodeType);
         explainer.explainNodeType();
 
         final int colId = get2();
 
-        final MtrNode node = new MtrNode(addr, (byte) nodeType, colId);
+        final MtrNode node = new MtrNode(addr, nodeFlags, colId);
         node.setLevel(level);
         explainer.explainInteger(2, colId, "column ID");
         if (colId == 0xFFFF) {
             float leafValue = get4f();
-            explainer.explainFloat(leafValue,"LEAF VALUE");
+            explainer.explainFloat(leafValue,"ROOT LEAF VALUE");
             node.setLeftLeafValue(leafValue);
             return node;
         } else if (colId > 100000) {
             throw new IllegalStateException("too big column ID: " + colId);
         }
 
-        int naSplitDirByte = get1U();
-        final NASplitDir naSplitDir = NASplitDir.valueOf(naSplitDirByte);
-        explainer.explainInteger(1, naSplitDirByte, "direction = " + naSplitDir);
-
+        final NASplitDir naSplitDir = parseSplitDirection();
         node.setSplitType(naSplitDir);
         boolean naVsRest = naSplitDir == NASplitDir.NAvsREST;
         boolean leftward = naSplitDir == NASplitDir.NALeft || naSplitDir == NASplitDir.Left;
 
         int lmask = nodeType & 0x33;
-        int equal = nodeType & 0x0C;
 
         // READ SPLIT VALUE
         if (naVsRest) {
             // NAs go left, numbers go right
         } else {
-            // "equal" determines what will be the split value
-            switch (equal) {
-                case 0x00: // split by number
+            switch (nodeFlags.splitValueType) {
+                case NUMBER: // split by number
                     float splitValue = get4f();
                     node.setSplitValueFloat(splitValue);
                     explainer.explainFloat(splitValue, "split value");
                     break;
-                case 0x08: // read 32 bits
+                case MINI_BITSET: // read 32 bits
                     skip(4); //TODO store them
                     explainer.explainBytes(4, "short bitset");
                     break;
-                case 0x0C: // read bits from n bytes
+                case BITSET: // read bits from n bytes
                 {
                     int bitoff = get2();
                     explainer.explainInteger(2, bitoff, "[].bitoff");
@@ -118,7 +125,7 @@ public class MojoTreeReader {
                     }
                     break;
                 }
-                default: throw new UnsupportedOperationException("equal=" + equal);
+                default: throw new UnsupportedOperationException("splitValueType is " + nodeFlags.splitValueType);
             }
 
         }
@@ -140,7 +147,7 @@ public class MojoTreeReader {
             node.setRightNodeAddress(rightNodeAddress);
         }
 
-        if ((nodeType & 0x10) > 0) {
+        if (nodeFlags.leftNodeIsLeaf) {
             float leafValue = get4f();
             node.setLeftLeafValue(leafValue);
             explainer.explainFloat(leafValue, "left leaf value");
@@ -149,7 +156,7 @@ public class MojoTreeReader {
             node.setLeftNode(left);
         }
         //
-        if ((nodeType & 0x40) > 0) {
+        if (nodeFlags.rightNodeIsLeaf) {
             float leafValue = get4f();
             node.setRightLeafValue(leafValue);
             explainer.explainFloat(leafValue, "right leaf value");
