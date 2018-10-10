@@ -56,10 +56,22 @@ public class MojoTreeReader {
 
     }
 
+    private NodeFlags parseNodeFlags() {
+        final NodeFlags nodeFlags = new NodeFlags((byte) get1U());
+        explainer.explainNodeType();
+        return nodeFlags;
+    }
+
+    private int parseColumnId() {
+        final int colId = get2();
+        explainer.explainInteger(2, colId, "COLUMN");
+        return colId;
+    }
+
     private NASplitDir parseSplitDirection() {
         int naSplitDirByte = get1U();
         final NASplitDir naSplitDir = NASplitDir.valueOf(naSplitDirByte);
-        explainer.explainInteger(1, naSplitDirByte, "direction = " + naSplitDir);
+        explainer.explainInteger(1, naSplitDirByte, "DIRECTION." + naSplitDir);
         return naSplitDir;
     }
 
@@ -115,7 +127,7 @@ public class MojoTreeReader {
                 case NUMBER: // split by number
                     float splitValue = get4f();
                     node.setSplitValueFloat(splitValue);
-                    explainer.explainFloat(splitValue, "split value");
+                    explainer.explainFloat(splitValue, "SPLITVAL");
                     break;
                 case BITSET_32: // read 32 bits
                     skip(4); //TODO store them
@@ -161,18 +173,6 @@ public class MojoTreeReader {
         }
         explainer.comment("< " + level);
         return node;
-    }
-
-    private int parseColumnId() {
-        final int colId = get2();
-        explainer.explainInteger(2, colId, "column ID");
-        return colId;
-    }
-
-    private NodeFlags parseNodeFlags() {
-        final NodeFlags nodeFlags = new NodeFlags((byte) get1U());
-        explainer.explainNodeType();
-        return nodeFlags;
     }
 
     private static int bytes(int nbits) {
