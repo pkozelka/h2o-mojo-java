@@ -8,8 +8,6 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RunWith(Parameterized.class)
 public class MultiTreeTest {
@@ -41,7 +39,7 @@ public class MultiTreeTest {
 
     @Test
     public void test() throws IOException {
-        final MojoTreeReader mtr = new MojoTreeReader(new File(trees, filename), 2, 100 /*130*/);
+        final MojoTreeReader mtr = new MojoTreeReader(new File(trees, filename), 100 /*130*/);
         final MtrNode root = mtr.readRootNode();
 
     }

@@ -12,11 +12,9 @@ public class MojoTreeReader {
     final byte[] bytes;
     int position = 0;
     private Explainer explainer = new Explainer(this);
-    private final int nclasses;
     private int mojoVersion;
 
-    public MojoTreeReader(File treeFile, int nclasses, int mojoVersion) throws IOException {
-        this.nclasses = nclasses;
+    public MojoTreeReader(File treeFile, int mojoVersion) throws IOException {
         this.mojoVersion = mojoVersion;
         try (final InputStream is = new FileInputStream(treeFile);
              final ByteArrayOutputStream os = new ByteArrayOutputStream()) {
@@ -181,8 +179,7 @@ public class MojoTreeReader {
 
         // never NAs in training, but have a way to deal with them in scoring
         Left(4),     //test time NA should go left
-        Right(5),    //test time NA should go right
-        OTHER(255);
+        Right(5);    //test time NA should go right
 
         private int value;
         NASplitDir(int v) { this.value = v; }
@@ -192,8 +189,8 @@ public class MojoTreeReader {
             for (NASplitDir c : values()) {
                 if (c.value == value) return c;
             }
-            return OTHER;
-//            throw new IllegalArgumentException(String.format("NASplitDir from 0x%02X = %1$d", value & 0xFF));
+//            return OTHER;
+            throw new IllegalArgumentException(String.format("NASplitDir from 0x%02X = %1$d", value & 0xFF));
         }
     }
 
