@@ -16,7 +16,7 @@ public class MojoTreeReaderTest {
 
     @Test
     public void readV130() throws IOException {
-        final MojoTreeReader mtr = new MojoTreeReader(new File("/home/pk/Downloads/Travelport-OneDrive_2018-09-26/SU/model/trees/t00_000.bin"), 2, 130);
+        final MojoTreeReader mtr = new MojoTreeReader(new File("/home/pk/h2o/h2o-mojo/testmodels/travelport/AA/trees/t00_000.bin"), 2, 130);
         final MtrNode root = mtr.readRootNode();
         System.out.println("root = " + root);
     }
