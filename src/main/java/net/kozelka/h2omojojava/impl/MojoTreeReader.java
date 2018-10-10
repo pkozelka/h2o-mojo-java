@@ -68,8 +68,7 @@ public class MojoTreeReader {
     private MtrNode readSubNode(String level) {
         explainer.comment("> " + level);
         final int addr = position;
-        final int nodeType = get1U();
-        final NodeFlags nodeFlags = new NodeFlags((byte) nodeType);
+        final NodeFlags nodeFlags = new NodeFlags((byte) get1U());
         explainer.explainNodeType();
 
         final int colId = get2();
@@ -91,8 +90,6 @@ public class MojoTreeReader {
         boolean naVsRest = naSplitDir == NASplitDir.NAvsREST;
         boolean leftward = naSplitDir == NASplitDir.NALeft || naSplitDir == NASplitDir.Left;
 
-        int lmask = nodeType & 0x33;
-
         // READ SPLIT VALUE
         if (naVsRest) {
             // NAs go left, numbers go right
@@ -103,7 +100,7 @@ public class MojoTreeReader {
                     node.setSplitValueFloat(splitValue);
                     explainer.explainFloat(splitValue, "split value");
                     break;
-                case MINI_BITSET: // read 32 bits
+                case BITSET_32: // read 32 bits
                     skip(4); //TODO store them
                     explainer.explainBytes(4, "short bitset");
                     break;
@@ -127,24 +124,6 @@ public class MojoTreeReader {
                 }
                 default: throw new UnsupportedOperationException("splitValueType is " + nodeFlags.splitValueType);
             }
-
-        }
-
-        // read RIGHT NODE OFFSET which actually is LEFT SIDE CONTENT size
-        final int rno;
-        switch (lmask) {
-            case 0x00: rno = get1U(); break;
-            case 0x01: rno = get2(); break;
-            case 0x02: rno = get3(); break;
-            case 0x03: rno = get4(); break;
-            case 0x10: rno = nclasses < 256 ? 1 : 2; break;
-            case 0x30: rno = 4; break;
-            default: throw new UnsupportedOperationException("lmask=" + lmask);
-        }
-        {
-            int rightNodeAddress = position + rno;
-            explainer.explainBytes(position - explainer.unexplainedPosition, String.format("offset=%d, right node address is %d = 0x%1$04X", rno, rightNodeAddress));
-            node.setRightNodeAddress(rightNodeAddress);
         }
 
         if (nodeFlags.leftNodeIsLeaf) {
@@ -152,6 +131,19 @@ public class MojoTreeReader {
             node.setLeftLeafValue(leafValue);
             explainer.explainFloat(leafValue, "left leaf value");
         } else {
+            // read RIGHT NODE OFFSET which actually is LEFT SIDE CONTENT size
+            final int offset;
+            switch (nodeFlags.offsetSize) {
+                case 1: offset = get1U(); break;
+                case 2: offset = get2(); break;
+                case 3: offset = get3(); break;
+                case 4: offset = get4(); break;
+                default: throw new UnsupportedOperationException("offsetSize=" + nodeFlags.offsetSize);
+            }
+            int rightNodeAddress = position + offset;
+            explainer.explainBytes(position - explainer.unexplainedPosition, String.format("offset=%d, right node address is %d = 0x%1$04X", offset, rightNodeAddress));
+            node.setRightNodeAddress(rightNodeAddress);
+
             final MtrNode left = readSubNode(level + "L");
             node.setLeftNode(left);
         }
