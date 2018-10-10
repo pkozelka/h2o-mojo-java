@@ -18,7 +18,8 @@ public class MultiTreeTest {
 //    private static final File trees = new File("/home/pk/h2o/h2o-mojo/testmodels/airlines2/unzipped/trees");
 
     // v1.30 fails:
-    private static final File trees = new File("/home/pk/h2o/h2o-mojo/testmodels/travelport/AA/trees");
+    private static final File trees = new File("src/test/resources/gbm-generated/trees");
+//    private static final File trees = new File("/home/pk/h2o/h2o-mojo/testmodels/travelport/AA/trees");
 
     @Parameterized.Parameters(name= "{0}")
     public static Iterable<? extends String> data() {
