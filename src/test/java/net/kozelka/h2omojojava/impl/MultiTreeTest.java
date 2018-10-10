@@ -11,14 +11,14 @@ import java.util.Arrays;
 
 @RunWith(Parameterized.class)
 public class MultiTreeTest {
-    private static final File trees = new File("src/test/resources/gbm_v1.00_names.mojo/trees/");
+//    private static final File trees = new File("src/test/resources/gbm_v1.00_names.mojo/trees/");
     //    private static final File trees = new File("src/test/resources/gbm_v1.00_titanic.mojo/trees/");
 //    private static final File trees = new File("/home/pk/h2o/h2o-mojo/testmodels/prostate/unzipped/trees");
 //    private static final File trees = new File("/home/pk/h2o/h2o-mojo/testmodels/airlines1/unzipped/trees");
 //    private static final File trees = new File("/home/pk/h2o/h2o-mojo/testmodels/airlines2/unzipped/trees");
 
     // v1.30 fails:
-//    private static final File trees = new File("/home/pk/Downloads/Travelport-OneDrive_2018-09-26/SU/model/trees");
+    private static final File trees = new File("/home/pk/h2o/h2o-mojo/testmodels/travelport/AA/trees");
 
     @Parameterized.Parameters(name= "{0}")
     public static Iterable<? extends String> data() {
@@ -39,7 +39,7 @@ public class MultiTreeTest {
 
     @Test
     public void test() throws IOException {
-        final MojoTreeReader mtr = new MojoTreeReader(new File(trees, filename), 100 /*130*/);
+        final MojoTreeReader mtr = new MojoTreeReader(new File(trees, filename), 130 /*100 vs. 130*/);
         final MtrNode root = mtr.readRootNode();
 
     }

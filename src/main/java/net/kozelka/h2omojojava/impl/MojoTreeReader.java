@@ -63,21 +63,26 @@ public class MojoTreeReader {
         return naSplitDir;
     }
 
+    private float parseLeafValue(String s) {
+        float leafValue = get4f();
+        explainer.explainFloat(leafValue, "LEAF." + s);
+        if (leafValue < -10 || leafValue > 10) {
+            throw new IllegalStateException(String.format("leaf value out of range: %f", leafValue));
+        }
+        return leafValue;
+    }
+
     private MtrNode readSubNode(String level) {
         explainer.comment("> " + level);
         final int addr = position;
-        final NodeFlags nodeFlags = new NodeFlags((byte) get1U());
-        explainer.explainNodeType();
+        final NodeFlags nodeFlags = parseNodeFlags();
 
-        final int colId = get2();
+        final int colId = parseColumnId();
 
         final MtrNode node = new MtrNode(addr, nodeFlags, colId);
         node.setLevel(level);
-        explainer.explainInteger(2, colId, "column ID");
         if (colId == 0xFFFF) {
-            float leafValue = get4f();
-            explainer.explainFloat(leafValue,"ROOT LEAF VALUE");
-            node.setLeftLeafValue(leafValue);
+            node.setLeftLeafValue(parseLeafValue("ROOT"));
             return node;
         } else if (colId > 100000) {
             throw new IllegalStateException("too big column ID: " + colId);
@@ -125,9 +130,7 @@ public class MojoTreeReader {
         }
 
         if (nodeFlags.leftNodeIsLeaf) {
-            float leafValue = get4f();
-            node.setLeftLeafValue(leafValue);
-            explainer.explainFloat(leafValue, "left leaf value");
+            node.setLeftLeafValue(parseLeafValue("Left"));
         } else {
             // read RIGHT NODE OFFSET which actually is LEFT SIDE CONTENT size
             final int offset;
@@ -147,15 +150,25 @@ public class MojoTreeReader {
         }
         //
         if (nodeFlags.rightNodeIsLeaf) {
-            float leafValue = get4f();
-            node.setRightLeafValue(leafValue);
-            explainer.explainFloat(leafValue, "right leaf value");
+            node.setRightLeafValue(parseLeafValue("Right"));
         } else {
             final MtrNode right = readSubNode(level + "r");
             node.setRightNode(right);
         }
         explainer.comment("< " + level);
         return node;
+    }
+
+    private int parseColumnId() {
+        final int colId = get2();
+        explainer.explainInteger(2, colId, "column ID");
+        return colId;
+    }
+
+    private NodeFlags parseNodeFlags() {
+        final NodeFlags nodeFlags = new NodeFlags((byte) get1U());
+        explainer.explainNodeType();
+        return nodeFlags;
     }
 
     private static int bytes(int nbits) {
