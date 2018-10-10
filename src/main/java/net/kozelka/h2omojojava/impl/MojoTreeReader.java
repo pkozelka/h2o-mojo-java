@@ -58,7 +58,12 @@ public class MojoTreeReader {
 
     private NodeFlags parseNodeFlags() {
         final NodeFlags nodeFlags = new NodeFlags((byte) get1U());
-        explainer.explainNodeType();
+        explainer.explainBytes(1, String.format("NODE left:%s, right:%s, splitBy:%s, offsetSize:%d",
+            nodeFlags.leftNodeIsLeaf ? "LEAF" : "TREE",
+            nodeFlags.rightNodeIsLeaf ? "LEAF" : "TREE",
+            nodeFlags.splitValueType,
+            nodeFlags.offsetSize
+            ));
         return nodeFlags;
     }
 
@@ -95,7 +100,7 @@ public class MojoTreeReader {
             default: throw new UnsupportedOperationException("offsetSize=" + nodeFlags.offsetSize);
         }
         final int rightNodeAddress = position + offset;
-        explainer.explainBytes(position - explainer.unexplainedPosition, String.format("offset=%d, right node address is %d = 0x%1$04X", offset, rightNodeAddress));
+        explainer.explainBytes(position - explainer.unexplainedPosition, String.format("OFFSET %d  ; right node address is %d = 0x%2$08X", offset, rightNodeAddress));
         return rightNodeAddress;
     }
 
@@ -125,29 +130,27 @@ public class MojoTreeReader {
         } else {
             switch (nodeFlags.splitValueType) {
                 case NUMBER: // split by number
-                    float splitValue = get4f();
-                    node.setSplitValueFloat(splitValue);
-                    explainer.explainFloat(splitValue, "SPLITVAL");
+                    node.setSplitValueFloat(parseSplitValue());
                     break;
                 case BITSET_32: // read 32 bits
                     skip(4); //TODO store them
-                    explainer.explainBytes(4, "short bitset");
+                    explainer.explainBytes(4, "BITSET_32");
                     break;
                 case BITSET: // read bits from n bytes
                 {
-                    int bitoff = get2();
-                    explainer.explainInteger(2, bitoff, "[].bitoff");
+                    final int bitoff = get2();
+                    explainer.explainInteger(2, bitoff, "BITSET.Offset");
                     if (mojoVersion < 130) {
-                        int nbytes = get2();
-                        explainer.explainInteger(2, nbytes, "[].nbytes");
+                        final int nbytes = get2();
+                        explainer.explainInteger(2, nbytes, "BITSET.Size.Bytes");
                         skip(nbytes); //TODO store them
-                        explainer.explainBytes(nbytes, "long bitset OLD");
+                        explainer.explainBytes(nbytes, "BITSET.Content  ; OLD");
                     } else {
-                        int nbits = get4();
+                        final int nbits = get4();
                         final int nbytes = bytes(nbits);
-                        explainer.explainInteger(4, nbits, "[].nbits");
+                        explainer.explainInteger(4, nbits, "BITSET.Size.Bits");
                         skip(nbytes); //TODO store them
-                        explainer.explainBytes(nbytes, "long bitset V1.30");
+                        explainer.explainBytes(nbytes, "BITSET.Content  ; V1.30");
                     }
                     break;
                 }
@@ -173,6 +176,12 @@ public class MojoTreeReader {
         }
         explainer.comment("< " + level);
         return node;
+    }
+
+    private float parseSplitValue() {
+        float splitValue = get4f();
+        explainer.explainFloat(splitValue, "SPLITVAL");
+        return splitValue;
     }
 
     private static int bytes(int nbits) {

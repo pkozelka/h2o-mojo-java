@@ -54,16 +54,6 @@ public class Explainer {
         }
     }
 
-    public void explainNodeType() {
-        byte u1NodeType = mtr.bytes[unexplainedPosition++];
-        describe("=== NODE === Rmask=%02X Lmask=%02X equal=%02X)",
-            u1NodeType & 0xC0,
-            u1NodeType & 0x33,
-            u1NodeType & 0x0C
-        );
-        flush();
-    }
-
     public void explainFloat(float value, String desc) {
         describe("%s = %f (float)", desc, value);
         unexplainedPosition += 4;
